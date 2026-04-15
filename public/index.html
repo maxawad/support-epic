@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Epic Vendor Services — Support Copilot</title>
+
+  <!-- iMessage / Open Graph Preview -->
+  <meta property="og:title" content="Epic Vendor Services — Support Copilot">
+  <meta property="og:description" content="AI-powered support copilot for Epic Vendor Services. Get instant, source-grounded answers to your FAQ questions.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://support-epic.maxawad.com">
+  <meta property="og:image" content="https://support-epic.maxawad.com/og-image.svg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:image:type" content="image/svg+xml">
+  <meta property="og:site_name" content="Epic Vendor Services">
+
+  <!-- Twitter Card -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Epic Vendor Services — Support Copilot">
+  <meta name="twitter:description" content="AI-powered support copilot for Epic Vendor Services.">
+  <meta name="twitter:image" content="https://support-epic.maxawad.com/og-image.svg">
+
+  <!-- Apple -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Epic Support">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%235b4cd4'/><text x='50' y='62' text-anchor='middle' font-size='40' fill='white'>E</text></svg>">
+
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div id="app">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <circle cx="16" cy="16" r="14" fill="#5b4cd4"/>
+            <text x="16" y="21" text-anchor="middle" font-size="14" font-weight="700" fill="white" font-family="system-ui">E</text>
+          </svg>
+        </div>
+        <div class="header-title">
+          <span class="header-name">Epic Vendor Services</span>
+          <span class="header-sub">Support Copilot</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="btn-icon" id="newChatBtn" title="New Chat">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          <span>New Chat</span>
+        </button>
+        <!-- Tab switcher -->
+        <div class="tab-switcher">
+          <button class="tab-btn active" data-tab="chat">Chat</button>
+          <button class="tab-btn" data-tab="docs">Docs</button>
+        </div>
+      </div>
+    </header>
+
+    <!-- Chat View -->
+    <main class="chat-view active" id="chatView">
+      <!-- Welcome Screen -->
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome-avatar">
+          <svg width="48" height="48" viewBox="0 0 48 48" fill="none">
+            <circle cx="24" cy="24" r="22" fill="#ede9fe"/>
+            <circle cx="16" cy="20" r="3" fill="#5b4cd4"/>
+            <circle cx="32" cy="20" r="3" fill="#5b4cd4"/>
+            <path d="M14 30 Q24 38 34 30" stroke="#5b4cd4" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h1>Welcome to Epic Vendor Services Support</h1>
+        <p class="welcome-desc">I'm your AI support copilot. I answer questions using official FAQ data with source citations. Ask me about authentication, billing, reporting, or general support.</p>
+
+        <div class="quick-actions">
+          <button class="quick-btn" data-query="How do I reset my password?">Password Reset</button>
+          <button class="quick-btn" data-query="How do I view my invoices?">View Invoices</button>
+          <button class="quick-btn" data-query="How do I generate a usage report?">Usage Reports</button>
+          <button class="quick-btn" data-query="How do I contact technical support?">Contact Support</button>
+        </div>
+
+        <div class="features">
+          <div class="feature">
+            <span class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b4cd4" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l2 2"/></svg>
+            </span>
+            <div>
+              <strong>Source-Grounded</strong>
+              <span>Every answer cites official FAQ sources</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b4cd4" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h10"/></svg>
+            </span>
+            <div>
+              <strong>Session Memory</strong>
+              <span>Remembers context within your conversation</span>
+            </div>
+          </div>
+          <div class="feature">
+            <span class="feature-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#5b4cd4" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+            </span>
+            <div>
+              <strong>Support-Safe</strong>
+              <span>Routes sensitive issues to proper channels</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Messages Container -->
+      <div class="messages" id="messages"></div>
+
+      <!-- Input Area -->
+      <div class="input-area">
+        <div class="input-wrapper">
+          <button class="btn-memory" id="memoryBtn" title="Session Memory" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M6 8h4M14 8h4M6 12h12M6 16h8"/>
+            </svg>
+            <span class="memory-badge" id="memoryBadge" hidden>0</span>
+          </button>
+          <input type="text" id="chatInput" placeholder="Ask about Epic Vendor Services..." autocomplete="off" maxlength="2000">
+          <button class="btn-send" id="sendBtn" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-footer">
+          <span class="model-label" id="modelLabel" tabindex="0">Powered by a frontier model</span>
+          <div class="model-tooltip" id="modelTooltip">gpt-5</div>
+        </div>
+      </div>
+    </main>
+
+    <!-- Docs View -->
+    <main class="docs-view" id="docsView">
+      <div class="docs-header">
+        <h1>Documentation & FAQ</h1>
+        <p>Browse our knowledge base to find answers to common questions about Epic Vendor Services.</p>
+        <div class="docs-search-wrapper">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#9ca3af" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+          <input type="text" id="docsSearch" placeholder="Search documentation...">
+        </div>
+      </div>
+      <div class="docs-content" id="docsContent"></div>
+    </main>
+
+    <!-- Memory Panel (slide-over) -->
+    <div class="memory-overlay" id="memoryOverlay" hidden>
+      <div class="memory-panel">
+        <div class="memory-panel-header">
+          <h2>Session Memory</h2>
+          <button class="btn-icon" id="closeMemoryBtn">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+          </button>
+        </div>
+        <p class="memory-desc">Facts remembered about you during this session. Stored locally on your device.</p>
+        <div class="memory-list" id="memoryList"></div>
+        <div class="memory-empty" id="memoryEmpty">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#d1d5db" stroke-width="1.5">
+            <rect x="2" y="4" width="20" height="16" rx="2"/>
+            <path d="M6 8h4M14 8h4M6 12h12M6 16h8"/>
+          </svg>
+          <span>No memories yet. As you chat, memorable context will appear here.</span>
+        </div>
+        <button class="btn-clear-memory" id="clearMemoryBtn">Clear All Memories</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

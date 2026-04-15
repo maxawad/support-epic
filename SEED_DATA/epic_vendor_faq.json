@@ -1,0 +1,178 @@
+{
+  "meta": {
+    "source": "Epic Vendor Services FAQ",
+    "domain": "support-epic.maxawad.com",
+    "last_updated": "2026-04-15",
+    "note": "Curated dataset based on publicly available Epic Vendor Services FAQ topics. All source URLs point to our hosted documentation."
+  },
+  "categories": [
+    {
+      "id": "authentication",
+      "title": "Authentication & Access",
+      "icon": "🔐",
+      "entries": [
+        {
+          "id": "auth-password-reset",
+          "question": "How do I reset my password?",
+          "answer": "To reset your password, contact your organization administrator. They can initiate a password reset through the admin console under User Management > Password Reset. If you don't know who your administrator is, reach out to your organization's IT helpdesk. Epic Vendor Services does not reset passwords directly — all credential management is handled by your organization's designated admin.",
+          "source_slug": "authentication/password-reset",
+          "tags": ["password", "reset", "access", "admin"]
+        },
+        {
+          "id": "auth-login-trouble",
+          "question": "I can't log in to the Vendor Services portal. What should I do?",
+          "answer": "If you're unable to log in, first verify that you're using the correct username and that Caps Lock is off. Try clearing your browser cache and cookies, then attempt again. If the issue persists, your account may be locked after multiple failed attempts — contact your organization administrator to unlock it. Supported browsers include the latest versions of Chrome, Edge, and Safari.",
+          "source_slug": "authentication/login-troubleshooting",
+          "tags": ["login", "access", "browser", "locked"]
+        },
+        {
+          "id": "auth-account-lockout",
+          "question": "My account is locked out. How do I regain access?",
+          "answer": "Accounts are automatically locked after 5 consecutive failed login attempts as a security measure. To unlock your account, contact your organization administrator. They can unlock it from the admin console under User Management > Account Status. The lockout duration is 30 minutes by default, but your admin can override this. If you suspect unauthorized access, report it to your admin immediately so they can review the audit log.",
+          "source_slug": "authentication/account-lockout",
+          "tags": ["lockout", "security", "access", "admin"]
+        },
+        {
+          "id": "auth-new-user",
+          "question": "How do I request a new user account?",
+          "answer": "New user accounts must be requested through your organization administrator. They can create accounts via the admin console under User Management > Create User. You'll need to provide the new user's full name, email address, role, and department. Once created, the new user will receive an activation email with instructions to set their password. Note that account provisioning may take up to 24 hours depending on your organization's approval workflow.",
+          "source_slug": "authentication/new-user-account",
+          "tags": ["new account", "registration", "onboarding", "admin"]
+        }
+      ]
+    },
+    {
+      "id": "billing",
+      "title": "Billing & Invoices",
+      "icon": "💳",
+      "entries": [
+        {
+          "id": "billing-view-invoices",
+          "question": "How do I view my invoices?",
+          "answer": "To view your invoices, navigate to the Billing section in the left sidebar, then click on 'Invoice History.' You can filter invoices by date range, status (paid, pending, overdue), and download them as PDF. Invoices are generated monthly on the 1st of each month. For consolidated billing across multiple departments, use the 'Billing Summary' report under Reports > Financial.",
+          "source_slug": "billing/invoices",
+          "tags": ["invoice", "billing", "payment", "pdf"]
+        },
+        {
+          "id": "billing-payment-methods",
+          "question": "What payment methods are accepted?",
+          "answer": "Epic Vendor Services accepts payment via ACH bank transfer, wire transfer, and corporate credit cards (Visa, Mastercard, American Express). Payment terms are Net 30 by default. To update your payment method, go to Billing > Payment Methods and click 'Add Payment Method.' For ACH payments, allow 3-5 business days for processing. Wire transfer instructions are available on each invoice.",
+          "source_slug": "billing/payment-methods",
+          "tags": ["payment", "ach", "credit card", "wire transfer"]
+        },
+        {
+          "id": "billing-dispute",
+          "question": "How do I dispute a charge on my invoice?",
+          "answer": "To dispute a charge, navigate to Billing > Invoice History, find the invoice in question, and click 'Dispute' next to the specific line item. Provide a detailed description of the dispute and any supporting documentation. Disputes must be filed within 60 days of the invoice date. Your account manager will review the dispute and respond within 5 business days. During the dispute process, the contested amount will not be considered overdue.",
+          "source_slug": "billing/dispute-charges",
+          "tags": ["dispute", "charge", "invoice", "billing"]
+        }
+      ]
+    },
+    {
+      "id": "claims",
+      "title": "Claims & Submissions",
+      "icon": "📋",
+      "entries": [
+        {
+          "id": "claims-submit",
+          "question": "How do I submit a new claim?",
+          "answer": "To submit a new claim, navigate to Claims > New Submission in the main menu. Fill out the required fields including claim type, date of service, provider information, and supporting documentation. All claims must include a valid reference number. Once submitted, you'll receive a confirmation email with a tracking number. Claims are typically processed within 10-15 business days.",
+          "source_slug": "claims/submit-claim",
+          "tags": ["claim", "submission", "new claim", "processing"]
+        },
+        {
+          "id": "claims-status",
+          "question": "How do I check the status of my claim?",
+          "answer": "To check your claim status, go to Claims > My Claims and use the search bar or filters to find your claim by tracking number, date range, or status. Claim statuses include: Submitted, Under Review, Approved, Denied, and Pending Additional Information. You can also set up email notifications for status changes under Settings > Notifications. For claims older than 90 days, check the Claims Archive section.",
+          "source_slug": "claims/claim-status",
+          "tags": ["claim", "status", "tracking", "review"]
+        },
+        {
+          "id": "claims-denied",
+          "question": "My claim was denied. What are my options?",
+          "answer": "If your claim was denied, you can view the denial reason under Claims > My Claims by clicking on the claim in question. Common denial reasons include missing documentation, invalid reference numbers, or duplicate submissions. You have 30 days from the denial date to submit an appeal. To appeal, click the 'Appeal' button on the claim detail page and provide any additional documentation that addresses the denial reason. Appeals are reviewed within 15 business days.",
+          "source_slug": "claims/denied-claims",
+          "tags": ["claim", "denied", "appeal", "rejection"]
+        }
+      ]
+    },
+    {
+      "id": "reporting",
+      "title": "Reporting & Analytics",
+      "icon": "📊",
+      "entries": [
+        {
+          "id": "reporting-usage",
+          "question": "How do I generate a usage report?",
+          "answer": "To generate a usage report, navigate to Reports > Usage Reports. Select the desired date range, department(s), and metrics you want to include. Available metrics include active users, transaction volume, claim submissions, and API calls. Reports can be exported as CSV, Excel, or PDF. You can also schedule recurring reports under Reports > Scheduled Reports to have them automatically emailed to you on a weekly or monthly basis.",
+          "source_slug": "reporting/usage-reports",
+          "tags": ["report", "usage", "analytics", "export"]
+        },
+        {
+          "id": "reporting-custom",
+          "question": "Can I create custom reports?",
+          "answer": "Yes, you can create custom reports using the Report Builder under Reports > Custom Reports. The Report Builder allows you to select from over 50 data fields, apply filters, choose groupings, and select visualization types (table, bar chart, line chart, pie chart). Custom reports can be saved and shared with other users in your organization. Note that access to the Report Builder requires the 'Report Administrator' role — contact your org admin to request this permission.",
+          "source_slug": "reporting/custom-reports",
+          "tags": ["report", "custom", "builder", "analytics"]
+        },
+        {
+          "id": "reporting-scheduled",
+          "question": "How do I set up scheduled reports?",
+          "answer": "To set up scheduled reports, go to Reports > Scheduled Reports and click 'Create Schedule.' Select an existing report or create a new one, then choose the frequency (daily, weekly, monthly), delivery time, and recipient email addresses. Scheduled reports are delivered as email attachments in your chosen format. You can manage and edit existing schedules from the same page. Each user can create up to 20 scheduled reports.",
+          "source_slug": "reporting/scheduled-reports",
+          "tags": ["report", "schedule", "automated", "email"]
+        }
+      ]
+    },
+    {
+      "id": "learning",
+      "title": "Learning & Resources",
+      "icon": "📚",
+      "entries": [
+        {
+          "id": "learning-training",
+          "question": "What training resources are available?",
+          "answer": "Epic Vendor Services offers several training resources: (1) Self-paced online courses available in the Learning Center under Help > Training, (2) Live webinars held monthly — check the Events Calendar for upcoming sessions, (3) Documentation and user guides in the Help Center, and (4) Video tutorials for common workflows. New users are encouraged to complete the 'Getting Started' course which covers navigation, basic workflows, and best practices. All training materials are free for active users.",
+          "source_slug": "learning/training-resources",
+          "tags": ["training", "learning", "courses", "webinar"]
+        },
+        {
+          "id": "learning-certification",
+          "question": "Is there a certification program?",
+          "answer": "Yes, Epic Vendor Services offers a certification program for power users and administrators. The program includes three levels: Associate, Professional, and Expert. Each level requires completing designated courses and passing an assessment exam. Certifications are valid for two years and can be renewed by completing continuing education credits. To enroll, visit Learning > Certification Program. There is no additional cost for certification for users with an active license.",
+          "source_slug": "learning/certification",
+          "tags": ["certification", "program", "exam", "professional"]
+        },
+        {
+          "id": "learning-updates",
+          "question": "How do I stay informed about product updates?",
+          "answer": "Stay informed about product updates through: (1) Release Notes — published with each update under Help > Release Notes, (2) The monthly Product Update newsletter — subscribe under Settings > Communications, (3) The Community Forum where product managers share roadmap updates and gather feedback, and (4) In-app notifications for critical updates. Major releases are announced at least 30 days in advance with detailed migration guides when applicable.",
+          "source_slug": "learning/product-updates",
+          "tags": ["updates", "releases", "newsletter", "community"]
+        }
+      ]
+    },
+    {
+      "id": "support",
+      "title": "Technical Support",
+      "icon": "🛠️",
+      "entries": [
+        {
+          "id": "support-contact",
+          "question": "How do I contact technical support?",
+          "answer": "You can contact technical support through several channels: (1) Submit a support ticket via Help > Contact Support — this is the fastest method for non-urgent issues, (2) Call the support hotline at 1-800-555-EPIC (3742) for urgent issues — available Monday-Friday, 7 AM - 7 PM CT, (3) Live chat available during business hours by clicking the chat icon in the bottom-right corner, and (4) Email support@vendorservices.epic.com. For critical system outages, use the priority hotline listed in your service agreement.",
+          "source_slug": "support/contact-support",
+          "tags": ["support", "contact", "help", "ticket"]
+        },
+        {
+          "id": "support-sla",
+          "question": "What are the support response time SLAs?",
+          "answer": "Support response times are based on ticket severity: Critical (system down, affecting all users) — 1 hour response, 4 hour resolution target. High (major feature unavailable, workaround exists) — 4 hour response, 1 business day resolution target. Medium (minor feature issue, no workaround) — 1 business day response, 3 business day resolution target. Low (general questions, feature requests) — 2 business day response. SLAs apply during business hours (Monday-Friday, 7 AM - 7 PM CT) unless your organization has a premium support agreement.",
+          "source_slug": "support/sla-response-times",
+          "tags": ["sla", "response time", "severity", "priority"]
+        }
+      ]
+    }
+  ]
+}
