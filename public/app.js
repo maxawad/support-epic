@@ -217,6 +217,13 @@
   function formatMarkdown(text) {
     let html = escapeHtml(text);
 
+    // Images/GIFs: ![alt](url)
+    html = html.replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_, alt, url) => {
+      const decodedUrl = url.replace(/&amp;/g, '&');
+      const safeAlt = alt || 'image';
+      return `<img src="${decodedUrl}" alt="${safeAlt}" class="chat-image" loading="lazy" onerror="this.style.display='none'">`;
+    });
+
     // Bold
     html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
 
@@ -225,6 +232,12 @@
 
     // Links [text](url)
     html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank">$1</a>');
+
+    // Bare image URLs on their own line
+    html = html.replace(/(^|<\/p><p>|<br>)(https?:\/\/\S+\.(?:gif|png|jpg|jpeg|webp|svg))(\s|$|<)/gi, (_, before, url, after) => {
+      const decodedUrl = url.replace(/&amp;/g, '&');
+      return `${before}<img src="${decodedUrl}" alt="image" class="chat-image" loading="lazy" onerror="this.style.display='none'">${after}`;
+    });
 
     // Numbered lists
     html = html.replace(/(?:^|\n)(\d+\.\s.+(?:\n(?!\n).*)*)/g, (match) => {

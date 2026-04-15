@@ -1,9 +1,9 @@
 const path = require('path');
+const fs = require('fs');
 
 async function main() {
   // Load .env manually (no dotenv dependency)
   try {
-    const fs = require('fs');
     const envPath = path.join(__dirname, '..', '.env');
     const envContent = fs.readFileSync(envPath, 'utf8');
     for (const line of envContent.split('\n')) {
@@ -21,14 +21,20 @@ async function main() {
   const { chatCompletion, extractMemories, parseSources, validateSources, isMockMode } = require('./llm');
   const { getAllCategories, getEntriesByCategory, getEntryBySlug, searchEntries } = require('./retrieval');
   const { buildFaqStore, rankMemories } = require('./embeddings');
+  const { readProjectFile, listProjectStructure, isInfrastructureQuery } = require('./sandbox');
+  const { trackChatMessage, trackChatError, trackMemoryExtraction, trackEditMessage, trackEditBlock, trackEditError, trackDocView, trackDocSearch, getStats } = require('./stats');
 
   const faqData = require('../SEED_DATA/epic_vendor_faq.json');
   const DOMAIN = 'https://support-epic.maxawad.com';
   const RAG_TOP_K = parseInt(process.env.RAG_TOP_K, 10) || 4;
   const MEMORY_TOP_K = parseInt(process.env.MEMORY_TOP_K, 10) || 3;
 
+  const EDIT_DURATION_MS = parseInt(process.env.EDIT_DURATION_MS, 10) || (2 * 60 * 60 * 1000);
+  const EDIT_START_TIME = Date.now();
+
   const faqStore = buildFaqStore(faqData, DOMAIN);
   console.log(`[rag] FAQ vector store built — ${faqData.categories.reduce((a, c) => a + c.entries.length, 0)} entries indexed`);
+  console.log(`[edit] Session active until ${new Date(EDIT_START_TIME + EDIT_DURATION_MS).toISOString()} (${EDIT_DURATION_MS / 60000}min)`);
 
   const app = express();
   const PORT = process.env.PORT || 3000;
@@ -37,10 +43,14 @@ async function main() {
   app.use(express.json());
   app.use(express.static(path.join(__dirname, '..', 'public')));
 
+  function isEditExpired() {
+    return Date.now() > EDIT_START_TIME + EDIT_DURATION_MS;
+  }
+
   // --- API Routes ---
 
   app.get('/api/health', (_req, res) => {
-    res.json({ status: 'ok', mock: isMockMode(), rag: true, timestamp: new Date().toISOString() });
+    res.json({ status: 'ok', mock: isMockMode(), rag: true, edit: !isEditExpired(), timestamp: new Date().toISOString() });
   });
 
   app.get('/api/faq/categories', (_req, res) => {
@@ -55,12 +65,15 @@ async function main() {
 
   app.get('/api/faq/search', (req, res) => {
     const q = req.query.q || '';
+    trackDocSearch();
     res.json(searchEntries(q));
   });
 
   app.post('/api/chat', async (req, res) => {
+    const startTime = Date.now();
     try {
       const { messages, memories } = req.body;
+      const sessionId = req.headers['x-session-id'] || req.ip;
 
       if (!messages || !Array.isArray(messages) || messages.length === 0) {
         return res.status(400).json({ error: 'messages array is required' });
@@ -96,6 +109,10 @@ async function main() {
         console.warn('[chat] Empty response after cleanup. Raw length:', raw.length, 'Raw preview:', raw.slice(0, 200));
       }
 
+      const elapsed = Date.now() - startTime;
+      trackChatMessage(elapsed, sessionId);
+      if (newMemories && newMemories.length > 0) trackMemoryExtraction(newMemories.length);
+
       res.json({
         response: cleanResponse || 'I\'m sorry, I wasn\'t able to generate a response. Please try rephrasing your question.',
         sources,
@@ -103,8 +120,158 @@ async function main() {
       });
     } catch (err) {
       console.error('Chat error:', err.message || err);
+      trackChatError();
       res.status(500).json({ error: 'Failed to generate response. Please try again.' });
     }
+  });
+
+  // --- Edit / Code Explorer ---
+
+  app.get('/edit', (_req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'edit.html'));
+  });
+
+  app.get('/api/edit/status', (_req, res) => {
+    if (isEditExpired()) {
+      return res.json({ expired: true, remainingMs: 0 });
+    }
+    const elapsed = Date.now() - EDIT_START_TIME;
+    res.json({ expired: false, remainingMs: EDIT_DURATION_MS - elapsed });
+  });
+
+  app.post('/api/edit/chat', async (req, res) => {
+    if (isEditExpired()) {
+      return res.json({ error: 'expired', response: 'This editing session has expired.' });
+    }
+
+    try {
+      const { messages } = req.body;
+      if (!messages || !Array.isArray(messages) || messages.length === 0) {
+        return res.status(400).json({ error: 'bad_request', response: 'messages array is required' });
+      }
+
+      const lastMsg = messages[messages.length - 1];
+      if (!lastMsg?.content || lastMsg.content.trim().length === 0) {
+        return res.status(400).json({ error: 'bad_request', response: 'Message cannot be empty' });
+      }
+
+      const userQuery = lastMsg.content;
+
+      if (isInfrastructureQuery(userQuery)) {
+        console.log(`[edit:blocked] "${userQuery.slice(0, 100)}"`);
+        trackEditBlock();
+        return res.json({
+          error: 'blocked',
+          response: 'This question is about infrastructure, API keys, or resources outside this project. That information is not available in this sandbox.\n\nFor more advanced capabilities, visit [codingschool.dev](https://codingschool.dev).',
+        });
+      }
+
+      const projectTree = listProjectStructure();
+      const treeStr = projectTree.map(f =>
+        f.type === 'directory' ? `${f.name}/` : f.name
+      ).join('\n');
+
+      let fileContext = '';
+      const filePatterns = [
+        /(?:show|read|open|display|cat|view)\s+(?:me\s+)?(.+)/i,
+        /(?:what(?:'s| is) in)\s+(.+)/i,
+        /^(server\/[\w./-]+|public\/[\w./-]+|tests\/[\w./-]+|SEED_DATA\/[\w./-]+|[\w]+\.\w+)$/i,
+      ];
+
+      for (const pattern of filePatterns) {
+        const match = userQuery.match(pattern);
+        if (match) {
+          const filePath = match[1].trim().replace(/[`'"]/g, '');
+          const result = readProjectFile(filePath);
+          if (result.type === 'file') {
+            fileContext = `\n\nFILE CONTENT (${filePath}):\n\`\`\`\n${result.content}\n\`\`\``;
+          } else if (result.type === 'directory') {
+            fileContext = `\n\nDIRECTORY LISTING (${filePath}):\n` +
+              result.entries.map(e => e.type === 'directory' ? `${e.name}/` : e.name).join('\n');
+          }
+          break;
+        }
+      }
+
+      const systemPrompt = `You are a code explorer for the Epic Vendor Services Support Copilot project. You help users understand, browse, and suggest edits to this codebase.
+
+RULES:
+1. You can ONLY discuss files within THIS project. Never reference other repos, servers, or infrastructure.
+2. When showing file contents, use markdown code blocks with the filename.
+3. You can suggest code changes but cannot execute them. Show diffs or proposed code.
+4. If asked about API keys, credentials, .env files, deployment infrastructure, or anything outside this project — refuse and say it's not available in this sandbox. Link to codingschool.dev for more.
+5. Be helpful, concise, and technical. Assume the user is a developer.
+6. When referencing project structure, use the tree provided below.
+
+PROJECT STRUCTURE:
+${treeStr}${fileContext}`;
+
+      const recentMessages = messages.slice(-10);
+      const fullMessages = [
+        { role: 'system', content: systemPrompt },
+        ...recentMessages,
+      ];
+
+      const FAST_MODEL = process.env.LLM_FAST_MODEL || 'gpt-4o-mini';
+      const BASE_URL = process.env.LLM_BASE_URL || 'https://api.openai.com/v1';
+      const API_KEY = process.env.LLM_API_KEY || '';
+
+      if (!API_KEY) {
+        return res.json({ response: 'LLM is not configured. Running in mock mode.' });
+      }
+
+      const REASONING_MODELS = /^(gpt-5|o[1-4])/;
+      const isReasoning = REASONING_MODELS.test(FAST_MODEL);
+      const body = {
+        model: FAST_MODEL,
+        messages: fullMessages,
+      };
+
+      if (isReasoning) {
+        body.max_completion_tokens = 4096;
+      } else {
+        body.temperature = 0.3;
+        body.max_tokens = 2048;
+      }
+
+      const llmRes = await fetch(`${BASE_URL}/chat/completions`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${API_KEY}` },
+        body: JSON.stringify(body),
+      });
+
+      if (!llmRes.ok) {
+        const errBody = await llmRes.text();
+        console.error(`[edit:llm] Error ${llmRes.status}:`, errBody);
+        throw new Error(`LLM error ${llmRes.status}`);
+      }
+
+      const llmData = await llmRes.json();
+      const content = llmData.choices?.[0]?.message?.content || '';
+
+      if (!content) {
+        console.warn('[edit] Empty LLM response');
+      }
+
+      trackEditMessage();
+      res.json({
+        response: content || 'I wasn\'t able to generate a response. Please try rephrasing.',
+      });
+
+    } catch (err) {
+      console.error('[edit:error]', err.message || err);
+      trackEditError();
+      res.status(500).json({ error: 'server_error', response: 'Failed to process request. Please try again.' });
+    }
+  });
+
+  // --- Stats ---
+  app.get('/stats', (_req, res) => {
+    res.sendFile(path.join(__dirname, '..', 'public', 'stats.html'));
+  });
+
+  app.get('/api/stats', (_req, res) => {
+    res.json(getStats());
   });
 
   // --- Documentation pages (our hosted clone) ---
@@ -118,6 +285,7 @@ async function main() {
     if (!entry) {
       return res.status(404).sendFile(path.join(__dirname, '..', 'public', 'docs', '404.html'));
     }
+    trackDocView();
     res.type('html').send(renderDocPage(entry));
   });
 
@@ -167,6 +335,7 @@ async function main() {
     console.log(`  Network: http://${HOST}:${PORT}`);
     console.log(`  Mode:    ${isMockMode() ? 'MOCK (no API key)' : 'LIVE (' + (process.env.LLM_CHAT_MODEL || 'gpt-4o') + ')'}`);
     console.log(`  RAG:     top-${RAG_TOP_K} retrieval, memory top-${MEMORY_TOP_K}`);
+    console.log(`  Edit:    http://localhost:${PORT}/edit (expires ${new Date(EDIT_START_TIME + EDIT_DURATION_MS).toLocaleTimeString()})`);
     console.log();
   });
 }

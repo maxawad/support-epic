@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Edit — Epic Vendor Services Support Copilot</title>
+
+  <meta property="og:title" content="Edit — Epic Vendor Services Support Copilot">
+  <meta property="og:description" content="Explore and interact with the source code of the Epic Vendor Services Support Copilot.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://support-epic.maxawad.com/edit">
+
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Edit Copilot">
+
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='45' fill='%231e1e2e'/><text x='50' y='64' text-anchor='middle' font-size='36' fill='%2389b4fa' font-family='monospace'>&#60;/&#62;</text></svg>">
+
+  <link rel="stylesheet" href="/edit-styles.css">
+</head>
+<body>
+  <div id="app">
+    <header class="header">
+      <div class="header-left">
+        <div class="logo">
+          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+            <rect width="32" height="32" rx="8" fill="#1e1e2e"/>
+            <text x="16" y="21" text-anchor="middle" font-size="13" font-weight="700" fill="#89b4fa" font-family="monospace">&lt;/&gt;</text>
+          </svg>
+        </div>
+        <div class="header-title">
+          <span class="header-name">Epic Vendor Services</span>
+          <span class="header-sub">Code Explorer</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="expiry-badge" id="expiryBadge">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span id="expiryText">--:--</span>
+        </div>
+        <a href="/" class="btn-icon" title="Back to Chat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>
+          <span>Support Chat</span>
+        </a>
+      </div>
+    </header>
+
+    <main class="edit-view" id="editView">
+      <!-- Welcome -->
+      <div class="welcome" id="welcomeScreen">
+        <div class="welcome-icon">
+          <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+            <rect width="56" height="56" rx="14" fill="#1e1e2e"/>
+            <text x="28" y="36" text-anchor="middle" font-size="22" font-weight="700" fill="#89b4fa" font-family="monospace">&lt;/&gt;</text>
+          </svg>
+        </div>
+        <h1>Explore the Codebase</h1>
+        <p class="welcome-desc">Ask questions about how this project works, browse the source files, or suggest code changes. Everything is sandboxed to this project only.</p>
+
+        <div class="quick-actions">
+          <button class="quick-btn" data-query="Show me the project structure">Project Structure</button>
+          <button class="quick-btn" data-query="How does the RAG retrieval work?">RAG Architecture</button>
+          <button class="quick-btn" data-query="Show me server/index.js">Server Code</button>
+          <button class="quick-btn" data-query="How is memory managed?">Memory System</button>
+        </div>
+
+        <div class="sandbox-notice">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2"><path d="M12 9v2m0 4h.01M5.07 19h13.86a2 2 0 001.74-3L13.73 4a2 2 0 00-3.46 0L3.34 16a2 2 0 001.73 3z"/></svg>
+          <span>This session is sandboxed to this project. Infrastructure, API keys, and other repositories are not accessible.</span>
+        </div>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages" id="messages"></div>
+
+      <!-- Input -->
+      <div class="input-area">
+        <div class="input-wrapper">
+          <input type="text" id="chatInput" placeholder="Ask about the code or request changes..." autocomplete="off" maxlength="2000">
+          <button class="btn-send" id="sendBtn" disabled>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+          </button>
+        </div>
+        <div class="input-footer">
+          <span class="model-label">Read-only sandbox &middot; No file attachments</span>
+        </div>
+      </div>
+    </main>
+
+    <!-- Expired overlay -->
+    <div class="expired-overlay" id="expiredOverlay" hidden>
+      <div class="expired-card">
+        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+        <h2>Session Expired</h2>
+        <p>This editing session has ended. The link is no longer active.</p>
+        <a href="/" class="btn-primary">Go to Support Chat</a>
+      </div>
+    </div>
+  </div>
+
+  <script src="/edit-app.js"></script>
+</body>
+</html>

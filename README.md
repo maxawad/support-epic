@@ -1,107 +1,156 @@
 # Epic Vendor Services — FAQ Support Copilot
 
-An AI-powered support copilot that answers Epic Vendor Services FAQ questions with **source-grounded responses** and **session memory**. Built as a single-page chat application with a browsable documentation reference.
+![Node.js](https://img.shields.io/badge/Node.js-18%2B-339933?logo=nodedotjs&logoColor=white)
+![Express](https://img.shields.io/badge/Express-5-000?logo=express&logoColor=white)
+![Tests](https://img.shields.io/badge/tests-98%20passing-brightgreen)
+![Lines of Code](https://img.shields.io/badge/LOC-3%2C200%2B-blue)
+![Dependencies](https://img.shields.io/badge/deps-1%20(express)-orange)
+![License](https://img.shields.io/badge/license-MIT-green)
 
-## Live Demo
+An AI-powered support copilot that answers Epic Vendor Services FAQ questions with **retrieval-augmented generation (RAG)**, **session memory**, and **source-grounded responses**. Zero build step. One dependency. Ships with a working API key.
 
-**https://support-epic.maxawad.com**
+<p align="center">
+  <img src="public/demo.svg" alt="Chat interface demo" width="720"/>
+</p>
+
+---
 
 ## Quick Start
 
 ```bash
-# 1. Clone the repo
 git clone https://github.com/maxawad/support-epic.git
 cd support-epic
-
-# 2. Install dependencies
 npm install
-
-# 3. Start the server (API key is pre-configured in .env)
 npm start
-
-# 4. Open in browser
-open http://localhost:3000
 ```
 
-A working `.env` with a pre-provisioned API key is included in this repo. The key has a **$10 budget cap** and expires after 30 days. No additional configuration needed — clone, install, run.
+Open **http://localhost:3000** — that's it. The `.env` ships with a working API key.
 
-Setup time: **< 2 minutes** on a fresh machine with Node.js installed.
+> **Setup time:** < 60 seconds on any machine with Node.js 18+. No database, no Docker, no build step.
 
-### Prerequisites
+---
 
-- **Node.js 18+** (tested on 22.x)
-- No other dependencies — no database, no Docker, no build step
+## Live Demo
+
+**https://support-epic.maxawad.com** — try it now.
+
+| Page | Description |
+|------|-------------|
+| [`/`](https://support-epic.maxawad.com) | Chat interface — ask anything about Epic Vendor Services |
+| [`/edit`](https://support-epic.maxawad.com/edit) | Code explorer — browse and ask about the source code |
+| [`/docs/...`](https://support-epic.maxawad.com/docs/authentication/password-reset) | Documentation pages — one per FAQ entry |
+| [`/downloads`](https://support-epic.maxawad.com/downloads) | Download the source code and build prompts |
+
+---
 
 ## Features
 
-### Chat Support
-- Natural language Q&A grounded in the FAQ knowledge base
-- Source citations linking to hosted documentation pages
+### RAG-Powered Chat
+- TF-IDF vector embeddings with cosine similarity — retrieves only the top-K relevant FAQ entries per query (not the entire knowledge base)
+- Source citations linking to hosted documentation pages on our domain
 - Quick-action buttons for common queries (Password Reset, View Invoices, etc.)
-- Proper domain-correct behavior: password/access questions route to org admins, never invents reset steps
-- Asks clarifying questions when information is ambiguous
+- Routes sensitive issues to proper channels (never invents password reset steps)
 
 ### Session Memory
-- Automatically extracts memorable facts from conversations (e.g. "The user works in the billing department")
-- Stored in **localStorage** on the user's device — no server-side tracking
-- Memory icon with badge count in the input area
-- Side panel to view, manage, and delete individual memories
-- Memories are included as context in subsequent queries for personalized responses
+- Extracts memorable facts automatically ("The user works in billing at a hospital")
+- Stored in `localStorage` — no server-side tracking, fully client-side
+- Only **relevant** memories are injected per query (cosine-ranked, top-3)
+- Memory panel to view, manage, and delete individual memories
+
+### Conversation Windowing
+- Keeps last 10 messages in full context
+- Older messages are summarized into a rolling paragraph by the fast model
+- Prevents context window exhaustion on long multi-turn sessions
+
+### Source Validation
+- Every cited URL is validated against known FAQ slugs before returning
+- Hallucinated sources are silently stripped and logged
+- All source links point to our hosted docs, never external sites
+
+### Code Explorer (`/edit`)
+- Dark-themed interface to browse and ask about the project source code
+- Sandboxed: blocks all infrastructure, credential, and out-of-scope queries
+- Time-limited sessions (configurable, default 2 hours)
 
 ### Documentation Browser
-- Browsable FAQ organized by category (Authentication, Billing, Claims, Reporting, Learning, Support)
-- Search/filter across all documentation
-- Expandable Q&A entries with links to dedicated doc pages
-- All source URLs point to our hosted domain (`support-epic.maxawad.com/docs/...`)
+- Browsable FAQ organized by 6 categories
+- Search/filter across all 18 entries
+- Dedicated `/docs/{category}/{slug}` pages with OG meta tags for iMessage previews
 
-### Source Grounding
-- Every response cites which FAQ entries influenced the answer
-- Source links point to our own documentation pages, not external sites
-- Dedicated `/docs/{category}/{slug}` pages for each FAQ entry
+---
 
 ## Architecture
 
 ```
-┌─────────────────────────────────────────┐
-│  Browser (Client)                       │
-│  ├── Chat UI (vanilla HTML/CSS/JS)      │
-│  ├── Docs Browser                       │
-│  └── Memory Manager (localStorage)      │
-└──────────────┬──────────────────────────┘
-               │ HTTP
-┌──────────────▼──────────────────────────┐
-│  Express Server (Node.js)               │
-│  ├── POST /api/chat                     │
-│  ├── GET  /api/faq/categories           │
-│  ├── GET  /api/faq/category/:id         │
-│  ├── GET  /api/faq/search?q=            │
-│  ├── GET  /api/health                   │
-│  └── GET  /docs/:category/:slug         │
-└──────────────┬──────────────────────────┘
-               │ OpenAI-compatible API
-┌──────────────▼──────────────────────────┐
-│  LLM Provider                           │
-│  ├── Chat model (frontier) — responses  │
-│  └── Fast model (mini) — memory extract │
-│  (or mock mode if no API key)           │
-└─────────────────────────────────────────┘
+                              ┌─────────────────────┐
+                              │   Browser (Client)   │
+                              │                     │
+                              │  Chat UI            │
+                              │  Memory (localStorage)
+                              │  Docs Browser       │
+                              │  Code Explorer       │
+                              └─────────┬───────────┘
+                                        │ HTTP
+                              ┌─────────▼───────────┐
+                              │   Express Server     │
+                              │                     │
+  ┌───────────────┐           │  POST /api/chat     │           ┌──────────────┐
+  │  FAQ Vector   │◀──query──▶│  GET  /api/faq/*    │──llm────▶│  LLM Provider │
+  │  Store        │  top-K    │  POST /api/edit/chat│           │              │
+  │  (TF-IDF)     │           │  GET  /docs/*       │           │  Chat: gpt-5 │
+  └───────────────┘           │  GET  /api/health   │           │  Fast: 4.1-mini│
+                              └─────────────────────┘           └──────────────┘
+```
+
+### Chat Request Flow
+
+```
+User message
+  → TF-IDF embed query
+  → Cosine similarity vs FAQ vector store → top-4 entries
+  → Rank memories by relevance → top-3
+  → Window conversation (last 10 msgs + rolling summary)
+  → Build system prompt with retrieved chunks + relevant memories
+  → LLM generates response
+  → Validate source URLs against known FAQ slugs
+  → Extract new memories (fast model, parallel)
+  → Return { response, sources[], newMemories[] }
 ```
 
 ### Stack Rationale
 
 | Choice | Reason |
 |--------|--------|
-| **Vanilla HTML/CSS/JS** | Zero build step, maximum portability, instant setup |
-| **Express 5** | Minimal, stable Node.js server; serves static files + API |
-| **No database** | FAQ data is a static JSON file; memory lives in client localStorage |
+| **Vanilla HTML/CSS/JS** | Zero build step, instant setup, maximum portability |
+| **Express 5** | Minimal server; serves static files + API in one process |
+| **TF-IDF embeddings** | Same RAG pipeline as neural embeddings, zero dependencies, works offline |
+| **No database** | FAQ is a static JSON; memory lives in client localStorage |
 | **OpenAI-compatible API** | Works with OpenAI, LiteLLM, Azure, or any compatible provider |
-| **No auth** | Per requirements — no authentication needed |
-| **Dual-model approach** | Fast model for memory extraction (low latency), frontier model for quality chat responses |
+| **Dual-model approach** | Fast model for memory extraction (low latency), frontier model for quality chat |
+
+---
+
+## Project Statistics
+
+| Metric | Value |
+|--------|-------|
+| **Server code** | 1,017 lines across 5 modules |
+| **Frontend code** | 2,203 lines (HTML + CSS + JS) |
+| **Test code** | 1,172 lines across 5 test files |
+| **Total lines** | 3,200+ |
+| **Tests passing** | 98 / 98 |
+| **Test suites** | 33 |
+| **Dependencies** | 1 (`express`) |
+| **FAQ entries** | 18 across 6 categories |
+| **Build step** | None |
+
+---
 
 ## API Reference
 
 ### `POST /api/chat`
-Send a message and get an AI response with sources.
+
+Send a message and get a RAG-grounded response with sources.
 
 ```json
 {
@@ -113,6 +162,7 @@ Send a message and get an AI response with sources.
 ```
 
 Response:
+
 ```json
 {
   "response": "To reset your password, contact your organization administrator...",
@@ -124,16 +174,24 @@ Response:
 ```
 
 ### `GET /api/faq/categories`
-Returns all FAQ categories with entry counts.
+All FAQ categories with entry counts.
 
 ### `GET /api/faq/category/:id`
-Returns a category with all its entries.
+A single category with all its entries.
 
 ### `GET /api/faq/search?q=query`
-Searches FAQ entries by keyword.
+Search FAQ entries by keyword.
 
 ### `GET /api/health`
-Health check — returns `{ status: "ok", mock: true/false }`.
+Health check — returns `{ status: "ok", mock: true/false, rag: true }`.
+
+### `POST /api/edit/chat`
+Code explorer chat (sandboxed, time-limited).
+
+### `GET /api/edit/status`
+Edit session countdown status.
+
+---
 
 ## Running Tests
 
@@ -141,49 +199,74 @@ Health check — returns `{ status: "ok", mock: true/false }`.
 npm test
 ```
 
-Tests cover:
+**98 tests, 33 suites, 0 failures** covering:
+- TF-IDF tokenization, cosine similarity, vector store operations
 - FAQ retrieval (categories, entries, search, slug lookup)
 - API endpoints (chat, categories, search, error handling)
-- Memory system (extraction, source parsing, deduplication)
+- Memory system (extraction, source parsing, deduplication, relevance ranking)
+- E2E conversations (single-turn, multi-turn, multi-part queries)
+- Source citation validation against known FAQ slugs
 
-See [TESTING.md](TESTING.md) for details.
+See [TESTING.md](TESTING.md) for strategy details.
+
+---
 
 ## Configuration
 
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `LLM_BASE_URL` | `https://api.openai.com/v1` | OpenAI-compatible API base URL |
-| `LLM_API_KEY` | _(none — mock mode)_ | API key for the LLM provider |
-| `LLM_CHAT_MODEL` | `gpt-4o` | Model for chat responses |
-| `LLM_FAST_MODEL` | `gpt-4o-mini` | Model for memory extraction |
+| `LLM_API_KEY` | _(ships in .env)_ | API key for the LLM provider |
+| `LLM_CHAT_MODEL` | `gpt-5` | Model for chat responses |
+| `LLM_FAST_MODEL` | `fast` | Model for memory extraction + summarization |
 | `PORT` | `3000` | Server port |
 | `HOST` | `0.0.0.0` | Server bind address |
+| `RAG_TOP_K` | `4` | FAQ entries retrieved per query |
+| `MEMORY_TOP_K` | `3` | Relevant memories injected per query |
+| `EDIT_DURATION_MS` | `7200000` | Code explorer session duration (ms) |
 
-If `LLM_API_KEY` is not set, the app runs in **mock mode** with keyword-matched responses from the FAQ data. This is fully functional for demo/evaluation purposes.
+If `LLM_API_KEY` is not set, the app runs in **mock mode** with keyword-matched FAQ responses — fully functional for evaluation.
+
+---
 
 ## Project Structure
 
 ```
 ├── SEED_DATA/
-│   └── epic_vendor_faq.json    # 18 Q&A entries across 6 categories
+│   └── epic_vendor_faq.json        # 18 Q&A entries across 6 categories
 ├── server/
-│   ├── index.js                # Express server, routing, doc page renderer
-│   ├── llm.js                  # LLM client, system prompt, memory extraction, mock mode
-│   └── retrieval.js            # FAQ search, category/entry lookups
+│   ├── index.js                    # Express server, routing, doc page renderer
+│   ├── llm.js                      # LLM client, system prompt, RAG prompt builder
+│   ├── retrieval.js                # FAQ search, category/entry lookups, slug validation
+│   ├── embeddings.js               # TF-IDF vectorizer, cosine similarity, vector store
+│   └── sandbox.js                  # Sandboxed file reader for code explorer
 ├── public/
-│   ├── index.html              # SPA with OG meta tags
-│   ├── styles.css              # Full responsive stylesheet
-│   ├── app.js                  # Client-side logic (chat, docs, memory)
-│   ├── og-image.svg            # Open Graph preview image
-│   └── docs/                   # Documentation page templates
+│   ├── index.html                  # Chat SPA with OG meta tags
+│   ├── app.js                      # Client: chat, docs browser, memory manager
+│   ├── styles.css                  # Responsive stylesheet (light theme)
+│   ├── edit.html                   # Code explorer page (dark theme)
+│   ├── edit-app.js                 # Code explorer client logic
+│   ├── edit-styles.css             # Code explorer styles
+│   ├── og-image.svg                # Open Graph preview image
+│   ├── demo.svg                    # Chat interface mockup for README
+│   └── downloads/                  # Downloadable project + prompts ZIPs
 ├── tests/
-│   ├── retrieval.test.js       # FAQ data + search tests
-│   ├── api.test.js             # HTTP endpoint integration tests
-│   └── memory.test.js          # Memory extraction + source parsing tests
-├── .env                        # Pre-configured with working API key ($10 budget)
-├── .env.example                # Environment template (for custom keys)
-├── PROMPTS.md                  # All prompts used to build this project
-├── README.md                   # This file
-├── AI_USAGE.md                 # AI tool usage documentation
-└── TESTING.md                  # Testing strategy documentation
+│   ├── retrieval.test.js           # FAQ data + search tests
+│   ├── api.test.js                 # HTTP endpoint integration tests
+│   ├── memory.test.js              # Memory extraction + source parsing tests
+│   ├── embeddings.test.js          # TF-IDF, cosine similarity, vector store tests
+│   └── e2e.test.js                 # End-to-end conversation tests
+├── .env                            # Working API key (ships with repo)
+├── .env.example                    # Environment template with docs
+├── package.json                    # 1 dependency: express
+├── README.md                       # This file
+├── AI_USAGE.md                     # AI tool usage documentation
+├── TESTING.md                      # Testing strategy documentation
+└── PROMPTS.md                      # All prompts used to build this project
 ```
+
+---
+
+## AI Usage
+
+This project was built with AI assistance. See [AI_USAGE.md](AI_USAGE.md) for full details on tools, models, and prompts used. All build prompts are documented in [PROMPTS.md](PROMPTS.md).
